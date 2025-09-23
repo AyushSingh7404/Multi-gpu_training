@@ -1,0 +1,54 @@
+In which compute environment are you running?
+Please select a choice using the arrow or number keys, an
+This machine
+
+Which type of machine are you using?
+Please select a choice using the arrow or number keys, an
+multi-GPU
+
+How many different machines will you use (use more than 1 for multi-node training)? [1]:
+Should distributed operations be checked while running fo r errors? This can avoid timeout issues but will be slowe
+r. [yes/NO]:
+
+Do you wish to optimize your script with torch dynamo? [ye
+s/NO]:
+
+Do you want to use DeepSpeed? [yes/NO]:
+
+Do you want to use FullyShardedDataParallel? [yes/NO]: yeS
+
+What should be your sharding strategy?
+Please select a choice using the arrow or number keys, an
+FULL_SHARD
+
+Do you want to offload parameters and gradients to CPU? [
+yes/NO]:
+
+What should be your auto wrap policy?
+Please select a choice using the arrow or number keys, an
+TRANSFORMER_BASED_WRAP
+
+Do you want to use the model's `_no_split_modules' to wra
+p. Only applicable for Transformers [yes/NO]: yes
+
+What should be your FSDP's backward prefetch policy?
+Please select a choice using the arrow or number keys, an
+BACKWARD_PRE
+
+What should be your FSDP's state dict type?
+Please select a choice using the arrow or number keys, an
+SHARDED_STATE_DICT
+
+Do you want to enable FSDP's forward prefetch policy? [ye
+s/NO]:
+
+Do you want to enable FSDP's `use_orig_params` feature? [
+YES/no]: no
+
+Do you want to enable CPU RAM efficient model loading? On ly applicable for Transformers models. [YES/no]:
+How many GPU(s) should be used for distributed training?
+[1]:2
+
+Do you wish to use FP16 or BF16 (mixed precision)?
+Please select a choice using the arrow or number keys, an
+bf16

@@ -1,0 +1,19 @@
+datasets
+scipy
+hf_transfer
+huggingface-hub
+wandb
+wheel
+git+https://github.com/huggingface/transformers
+git+https://github.com/huggingface/accelerate
+git+https://github.com/huggingface/peft
+git+https://github.com/huggingface/trl
+bitsandbytes
+deepspeed
+einops
+sentencepiece
+nltk
+xformers
+ninja  # For DeepSpeed JIT compilation
+triton
+scipy

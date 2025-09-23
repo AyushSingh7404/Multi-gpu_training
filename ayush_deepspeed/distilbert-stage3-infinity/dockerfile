@@ -1,0 +1,46 @@
+# Use NVIDIA PyTorch container (CUDA + cuDNN + PyTorch pre-installed)
+FROM nvcr.io/nvidia/pytorch:24.03-py3
+
+# Set working directory
+WORKDIR /workspace
+
+# Environment variables
+ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+ARG WANDB_API_KEY
+ENV WANDB_API_KEY=${WANDB_API_KEY}
+
+# Install OS-level dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git wget curl unzip vim ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip
+RUN pip install --no-cache-dir --upgrade pip wheel setuptools
+
+# Core Python packages (no version pins)
+RUN pip install --no-cache-dir \
+    datasets \
+    scipy \
+    hf_transfer \
+    huggingface-hub \
+    wandb \
+    bitsandbytes \
+    deepspeed \
+    einops \
+    sentencepiece \
+    nltk \
+    xformers \
+    ninja \
+    triton \
+    transformers \
+    accelerate \
+    peft \
+    trl \
+    dotenv \
+    torchvision
+
+# Copy training script and Accelerate config
+COPY train.py accelerate_config.yaml deepspeed_infinity_config.json /workspace/
+
+# Default command to launch training
+CMD ["accelerate", "launch", "--config_file", "accelerate_config.yaml", "train.py"]
