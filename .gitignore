@@ -9,3 +9,4 @@ output-zero1/
 saved_bert_model/
 =0.27.0
 trainer_output/
+env.list

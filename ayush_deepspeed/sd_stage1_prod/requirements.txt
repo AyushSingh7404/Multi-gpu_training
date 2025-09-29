@@ -1,0 +1,56 @@
+# Production Requirements for Stable Diffusion 3.5 Training
+# Compatible with PyTorch 2.4.0 and CUDA 12.1
+
+# Core ML libraries
+datasets==2.21.0
+scipy==1.13.1
+
+# Hugging Face ecosystem 
+huggingface-hub==0.25.2
+transformers>=4.45.0
+accelerate==0.34.0
+peft==0.12.0
+trl==0.10.1
+sentencepiece==0.2.0
+
+# Training and optimization
+bitsandbytes==0.43.3
+deepspeed==0.15.0
+
+# Monitoring and logging
+wandb==0.18.3
+
+# Text processing
+nltk==3.9.1
+
+# System utilities
+ninja==1.11.1
+python-dotenv==1.0.1
+psutil>=5.9.0
+
+# AWS integration
+boto3==1.35.35
+
+# Image processing
+pillow==10.4.0
+
+# Fast file transfers
+hf_transfer==0.1.9
+
+# Data manipulation
+pandas>=2.0.0
+
+# Development tools
+tqdm>=4.65.0
+
+# Diffusers (will be upgraded at runtime if needed)
+diffusers>=0.31.0
+
+# Note: The following packages come pre-installed in NVIDIA containers:
+# - torch==2.4.0
+# - torchvision==0.19.0  
+# - torchaudio==2.4.0
+# - xformers==0.0.27.post2
+# - flash-attn==2.6.1
+# - triton
+# - einops

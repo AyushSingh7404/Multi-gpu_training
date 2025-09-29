@@ -17,17 +17,17 @@
   },
   "zero_optimization": {
     "stage": 3,
-    "infinity_offload_params": {
+    "offload_param": {
       "device": "nvme",
-      "nvme_path": "/tmp",
+      "nvme_path": "/nvme",
       "pin_memory": true,
       "buffer_size": 1e8,
       "buffer_count": 5,
       "max_in_cpu": 1e9
     },
-    "infinity_offload_optimizer": {
+    "offload_optimizer": {
       "device": "nvme",
-      "nvme_path": "/tmp",
+      "nvme_path": "/nvme",
       "pin_memory": true,
       "buffer_size": 1e8,
       "buffer_count": 5,

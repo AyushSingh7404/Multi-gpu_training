@@ -11,7 +11,7 @@ ENV WANDB_API_KEY=${WANDB_API_KEY}
 
 # Install OS-level dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git wget curl unzip vim ninja-build \
+    git wget curl unzip vim ninja-build nvme-cli \
     && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip
@@ -37,6 +37,7 @@ RUN pip install --no-cache-dir \
     peft \
     trl \
     dotenv \
+    boto3 \
     torchvision
 
 # Copy training script and Accelerate config

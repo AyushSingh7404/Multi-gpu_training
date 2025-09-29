@@ -1,0 +1,91 @@
+# Use NVIDIA PyTorch container with stable PyTorch 2.4.0
+FROM nvcr.io/nvidia/pytorch:24.07-py3
+
+# Set working directory
+WORKDIR /workspace
+
+# Environment variables
+ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+ENV TZ=Asia/Kolkata
+# Set timezone non-interactively
+ENV DEBIAN_FRONTEND=noninteractive
+ARG WANDB_API_KEY
+ENV WANDB_API_KEY=${WANDB_API_KEY}
+ARG HF_TOKEN
+ENV HF_TOKEN=${HF_TOKEN}
+
+# Install OS-level dependencies, explicitly avoiding interactive prompts
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub && \
+    apt-get update && \
+    # Configure timezone non-interactively
+    ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime && \
+    echo "Asia/Kolkata" > /etc/timezone && \
+    apt-get install -y --no-install-recommends \
+    git wget curl unzip vim ninja-build nvme-cli \
+    python3-botocore python3-s3transfer python3-jmespath python3-urllib3 python3-certifi python3-chardet python3-idna python3-requests python3-pyasn1 python3-colorama python3-six python3-dateutil python3-rsa python3-roman python3-docutils python3-yaml python3-pkg-resources \
+    tzdata awscli \
+    && rm -rf /var/lib/apt/lists/*
+
+# Reset frontend to default after installation
+ENV DEBIAN_FRONTEND=dialog
+
+# Create dataset directory (will be populated at runtime)
+RUN mkdir -p /workspace/cc_data
+
+# Upgrade pip
+RUN pip install --no-cache-dir --upgrade pip wheel setuptools
+
+# Uninstall any existing problematic packages
+RUN pip uninstall -y xformers flash-attn diffusers transformers || true
+
+# Install PyTorch 2.4.0 stable (matching the container)
+RUN pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
+
+# Install compatible xformers for PyTorch 2.4.0
+RUN pip install xformers==0.0.27.post2
+
+# Install flash-attention compatible with PyTorch 2.4.0
+RUN pip install flash-attn==2.6.1 --no-build-isolation
+
+# Install from requirements.txt (without conflicting packages)
+COPY requirements.txt /workspace/
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy training script, test script, and configs
+COPY train.py test.py default_config.yaml ds_config.json /workspace/
+
+# Default command to download dataset and launch training
+CMD ["/bin/bash", "-c", "if [ ! -f /workspace/cc_data/dataset.jsonl ]; then echo 'Downloading dataset...'; aws s3 cp s3://alltrainingdata/SD35/cc_data.zip /workspace/cc_data.zip && unzip /workspace/cc_data.zip -d /workspace && rm /workspace/cc_data.zip; fi && accelerate launch --config_file default_config.yaml train.py"]
+
+## Run command
+# Build the Docker image
+# docker build -t sd35-training .
+# docker build --no-cache -t sd35-training .
+
+# Run the Docker container with GPU support and environment variables
+# docker run --gpus all \
+#   -e AWS_ACCESS_KEY_ID \
+#   -e AWS_SECRET_ACCESS_KEY \
+#   -e WANDB_API_KEY=your_wandb_key \
+#   -e HF_TOKEN=your_hf_token \
+#   -e MODEL_ID=stabilityai/stable-diffusion-3.5-medium \
+#   -e DATASET_PATH=/workspace/cc_data \
+#   -e OUTPUT_DIR=./results \
+#   -e NUM_EPOCHS=2 \
+#   -e BATCH_SIZE=2 \
+#   -e GRAD_ACCUM_STEPS=2 \
+#   -e LEARNING_RATE=5e-5 \
+#   -e RESOLUTION=512 \
+#   -e LOGGING_STEPS=20 \
+#   -e SAVE_STEPS=500 \
+#   -e LORA_RANK=16 \
+#   -e LORA_ALPHA=32 \
+#   -e RUN_NAME=sd35-lora-custom-run \
+#   -v $(pwd)/results:/workspace/results \
+#   -v $(pwd)/logs:/workspace/logs \
+#   sd35-training \
+#   /bin/bash -c "pip install --upgrade transformers>=4.45.0 && if [ ! -f /workspace/cc_data/dataset.jsonl ]; then echo 'Downloading dataset...'; aws s3 cp s3://alltrainingdata/SD35/cc_data.zip /workspace/cc_data.zip && unzip /workspace/cc_data.zip -d /workspace && rm /workspace/cc_data.zip; fi && accelerate launch --config_file default_config.yaml train.py"
+
+# docker run --gpus all   -e AWS_ACCESS_KEY_ID   -e AWS_SECRET_ACCESS_KEY   -e WANDB_API_KEY=your_wandb_key   -e HF_TOKEN=your_hf_token   -e MODEL_ID=stabilityai/stable-diffusion-3.5-medium   -e DATASET_PATH=/workspace/cc_data   -e OUTPUT_DIR=./results   -e NUM_EPOCHS=2   -e BATCH_SIZE=1   -e GRAD_ACCUM_STEPS=8   -e LEARNING_RATE=5e-5   -e RESOLUTION=512   -e LOGGING_STEPS=20   -e SAVE_STEPS=500   -e LORA_RANK=16   -e LORA_ALPHA=32   -e RUN_NAME=sd35-lora-custom-run   -v $(pwd)/results:/workspace/results   -v $(pwd)/logs:/workspace/logs   sd35-training
+
+# docker run --gpus all   -e AWS_ACCESS_KEY_ID   -e AWS_SECRET_ACCESS_KEY   -e WANDB_API_KEY=your_wandb_key   -e HF_TOKEN=your_hf_token   -e MODEL_ID=stabilityai/stable-diffusion-3.5-medium   -e DATASET_PATH=/workspace/cc_data   -e OUTPUT_DIR=./results   -e NUM_EPOCHS=2   -e BATCH_SIZE=2   -e GRAD_ACCUM_STEPS=2   -e LEARNING_RATE=5e-5   -e RESOLUTION=512   -e LOGGING_STEPS=20   -e SAVE_STEPS=500   -e LORA_RANK=16   -e LORA_ALPHA=32   -e RUN_NAME=sd35-lora-custom-run   -v $(pwd)/results:/workspace/results   -v $(pwd)/logs:/workspace/logs   sd35-training
